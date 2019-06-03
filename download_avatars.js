@@ -1,25 +1,28 @@
 const request = require('request');
 const fs = require('fs');
+const token = require('./secrets.js');
 const repoName = process.argv[2];
-const ownerName = process.argv[3];
-
-let createURL = 'https://github.com/' + ownerName + '/' + repoName;
-console.log(createURL);
+const repoOwner = process.argv[3];
 
 
-request(createURL)
-  .on('error', function(err) {
-    throw err;
-  })
-  .on('response', function(response) {
-    console.log('Response satus code: ', response.statusCode);
-    console.log('Response message: ', response.statusMessage);
-    console.log('Response header: ', response.headers['content-type']);    
-  })
-  .on('end', function() {
-    console.log('Response stream complete.');
-  })
-  .pipe(fs.createWriteStream('./avatars/image.jpg'));  
+let getRepoContributors = function(repoOwner, repoName, callback) {
+  
+  let options = {
+    url: 'https://github.com/' + repoOwner + '/' + repoName + '/contributors',
+    headers: { 'User-Agent': 'request' },
+    Authorization: `token ${token[0]}`,
+  };
+
+  request(options, function(err, res, body) {
+    callback(err, body);
+  });
+  
+};
+
+getRepoContributors(repoOwner, repoName, function(err, result) {
+  console.log('error', err);
+  console.log('result', result);
+});
 
 
 
