@@ -1,34 +1,38 @@
 const request = require('request');
-const fs = require('fs');
+//const fs = require('fs');
 const token = require('./secrets.js');
 const repoName = process.argv[2];
 const repoOwner = process.argv[3];
 
 
-let getRepoContributors = function(repoOwner, repoName, callback) {
+let getRepoContributors = function(owner, name, callback) {
   
   let options = {
-    url: 'https://github.com/' + repoOwner + '/' + repoName + '/contributors',
-    headers: { 'User-Agent': 'request' },
-    Authorization: `token ${token[0]}`,
+    url: 'https://api.github.com/repos/' + owner + '/' + name + '/contributors',
+    headers: { 
+      'User-Agent': 'request',
+      'Authorization': `token ${token.GITHUB_TOKEN}`,
+    }
   };
-
-  request(options, function(err, res, body) {
-    callback(err, body);
+    
+  request(options, function(err, response, body) { 
+    
+    let obj = JSON.parse(body);
+    callback(obj);
   });
   
+
 };
 
-getRepoContributors(repoOwner, repoName, function(err, result) {
-  console.log('error', err);
-  console.log('result', result);
+getRepoContributors(repoOwner, repoName, function(obj) {
+ 
+  for (let i = 0; i < obj.length; i++) {
+    console.log(obj[i]['avatar_url']);  
+  }
 });
 
 
 
 
 // location of avatar info in JSON API for github
-// imgLocation = JSON.parse(obj.owner.avatar_url)
-
-
-// github token: 4e3d6b62666a38428f220f803766a5b80b44533e.pipe(fs.createWriteStream('./future.jpg'));
+// imgLocation = obj.owner.avatar_url
