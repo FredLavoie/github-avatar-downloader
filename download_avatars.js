@@ -19,11 +19,15 @@ let getRepoContributors = function(owner, name, callback) {
   };
   // request contributors JSON data from github api    
   request(options, function(error, response, body) {
-    console.log('error: ', error);
-    console.log('statusCode: ', response && response.statusCode);
-            
+    if (error) {
+      console.log('error: ', error);
+      console.log('statusCode: ', response && response.statusCode);
+    }
+
     let obj = JSON.parse(body);
     callback(obj);  // call anonymous function of getRepoContributors function
+    console.log('Download complete');
+    
   });
   
 };
