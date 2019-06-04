@@ -1,5 +1,5 @@
 const request = require('request');
-//const fs = require('fs');
+const fs = require('fs');
 const token = require('./secrets.js');
 const repoName = process.argv[2];
 const repoOwner = process.argv[3];
@@ -15,24 +15,32 @@ let getRepoContributors = function(owner, name, callback) {
     }
   };
     
-  request(options, function(err, response, body) { 
-    
+  request(options, function(error, response, body) {
+    console.log('error: ', error);
+    console.log('statusCode: ', response && response.statusCode);
+            
     let obj = JSON.parse(body);
     callback(obj);
   });
   
-
 };
 
 getRepoContributors(repoOwner, repoName, function(obj) {
- 
+
   for (let i = 0; i < obj.length; i++) {
-    console.log(obj[i]['avatar_url']);  
+    let url = obj[i]['avatar_url'];
+    let filePath = `./avatars/${obj[i]['login']}.jpg`;
+
+
+    let downloadImageByURL = function(url, filePath) {
+ 
+      request(url)
+        .on('error', function(err) {
+          throw err;
+        })
+        .pipe(fs.createWriteStream(filePath));
+    
+    };
+    downloadImageByURL(url, filePath);
   }
 });
-
-
-
-
-// location of avatar info in JSON API for github
-// imgLocation = obj.owner.avatar_url
