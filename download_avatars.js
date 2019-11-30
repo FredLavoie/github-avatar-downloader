@@ -7,7 +7,6 @@ const token = require('./secrets.js');
 const repoName = process.argv[2];
 const repoOwner = process.argv[3];
 
-
 let getRepoContributors = function(owner, name, callback) {
 
   let options = {
@@ -25,30 +24,37 @@ let getRepoContributors = function(owner, name, callback) {
     }
 
     let obj = JSON.parse(body);
-    callback(obj);  // call anonymous function of getRepoContributors function
-    console.log('Download complete');
-    
+    callback(obj, printCompleteMessageToConsole); // call loopThroughContributors function
   });
   
 };
 
-getRepoContributors(repoOwner, repoName, function(obj) {
+function loopThroughContributors(obj, callback) {
+
+  function downloadImageByURL(url, filePath) { 
+    // request individual avatars and save them to file
+    request(url)
+      .on('error', function(err) {
+        throw err;
+      })
+      .pipe(fs.createWriteStream(filePath));
+  }
 
   // cycle through contributors to get each of their avatars
   for (let i = 0; i < obj.length; i++) {
     let url = obj[i]['avatar_url'];
     let filePath = `./avatars/${obj[i]['login']}.jpg`;
 
-
-    let downloadImageByURL = function(url, filePath) { 
-      // request individual avatars and save them to file
-      request(url)
-        .on('error', function(err) {
-          throw err;
-        })
-        .pipe(fs.createWriteStream(filePath));
-    
-    };
     downloadImageByURL(url, filePath);
   }
-});
+
+  callback();
+}
+
+// Log message to console once downloads are complete
+function printCompleteMessageToConsole() {
+  console.log('Download complete');
+}
+
+// send the function the two parameters + a callback function
+getRepoContributors(repoOwner, repoName, loopThroughContributors);
