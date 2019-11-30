@@ -44,7 +44,7 @@ function loopThroughContributors(obj, callback) {
   for (let i = 0; i < obj.length; i++) {
     let url = obj[i]['avatar_url'];
     let filePath = `./avatars/${obj[i]['login']}.jpg`;
-
+    console.log(`getting avatar for: ${obj[i]['login']}`);
     downloadImageByURL(url, filePath);
   }
 
